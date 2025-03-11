@@ -23,18 +23,11 @@
         const addTaskModal = document.getElementById('addTask')
         const judul = document.getElementById('judul')
         const deskripsi = document.getElementById('deskripsi')
-        const formDetail = document.getElementById('formDetail')
 
         judul.value = ''
         deskripsi.value = ''
-        formDetail.action = `includes/edit_tugas.php?id=${id}`
 
         addTaskModal.classList.toggle('hidden')
-    }
-
-    const togglePin = () => {
-        const pinIcon = document.getElementById('pinIcon')
-        pinIcon.classList.toggle('-outline')
     }
 
     const toggleEditMode = () => {
@@ -52,8 +45,21 @@
             descInput.setAttribute('readonly', true)
             btnEdit.setAttribute('disabled', true)
         }
-
     }
+
+    const togglePin = (id, status) => {
+        const newStatus = status === 1 ? 0 : 1
+        
+        fetch(`includes/update_pin.php?id=${id}&status=${newStatus}`, {
+            method: 'GET'
+        })
+        .then (response => response.text())
+        .then (result => {
+            location.reload()
+        })
+        .catch (error => console.log('Terjadi Kesalahan Dalam Proses Pin Tugas: ', error))
+    }
+
 </script>
 
 <!DOCTYPE html>
@@ -76,9 +82,9 @@
         </div>
 
         <!-- Body -->
-         <div class="w-[70%] max-h-[70%] space-y-3 overflow-y-auto">
+         <div class="w-[70%] max-h-[60%] overflow-y-auto flex flex-col">
             <?php while ($row = mysqli_fetch_array($getTugas)): ?>
-                <form action="includes/hapus_tugas.php?id=<?= $row['ID'] ?>" method="post" class="w-full pl-3 bg-slate-700 text-white rounded-md hover:scale-100 duration-500 flex justify-between">
+                <form action="includes/hapus_tugas.php?id=<?= $row['ID'] ?>" method="post" class="w-full pl-3 bg-slate-700 text-white rounded-md hover:scale-100 duration-500 flex justify-between my-2 <?= $row['is_pin'] == 1 ? 'order-first' : '' ?>">
                     <div class="flex w-full items-center">
                         <input type="checkbox" class="mr-3 accent-green-500">
                         <div class="flex-1 cursor-pointer py-5" onclick="toggleViewModal('<?= $row['ID'] ?>', '<?= $row['Tugas'] ?>', '<?= $row['Deskripsi'] ?>')">
@@ -88,8 +94,8 @@
                     </div>
 
                     <div class="w-max h-full flex">
-                        <button type="button" class="py-5 px-5 hover:bg-slate-500 duration-500">
-                            <i class="mdi mdi-pin-outline" style="font-size: 22px;" id="pinIcon"></i>
+                        <button type="button" onclick="togglePin(<?= $row['ID'] ?>, <?= $row['is_pin'] ?>)" class="py-5 px-5 hover:bg-slate-500 duration-500">
+                            <i class="mdi <?= $row['is_pin'] == 1 ? 'mdi-pin' : 'mdi-pin-outline' ?>" style="font-size: 22px;" id="pinIcon"></i>
                         </button>
 
                         <button name="hapus_tugas" onclick="return confirm('Anda yakin mau menghapus tugas ini?')" class="py-5 px-5 hover:bg-red-500 duration-500 rounded-r-md">
