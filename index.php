@@ -4,6 +4,9 @@
     $querySelect = "SELECT * FROM tugas";
     $getTugas = mysqli_query($connect, $querySelect);
 
+    $querySelectStatistik = "SELECT * FROM statistik";
+    $getStatistik = mysqli_query($connect, $querySelectStatistik);
+
     $queryCount = "SELECT COUNT(*) as total FROM Tugas";
     $resultCount = mysqli_query($connect, $queryCount);
     $dataCount = mysqli_fetch_assoc($resultCount);
@@ -102,6 +105,12 @@
         }
     }
 
+    const toggleModalStatistik = () => {
+        const modal = document.getElementById('modalStatistik')
+
+        modal.classList.toggle('hidden')
+    }
+
 </script>
 
 <!DOCTYPE html>
@@ -120,9 +129,10 @@
         <!-- Head -->
         <div class="w-[70%] mt-[10%] flex justify-between">
             <h1 class="font-bold text-lg text-white">Tugas Anda</h1>
-            <div class="mb-0">
+            <div class="flex items-center space-x-3">
                 <button id="btnFinish" name="selesaikan_tugas" onclick="selesaikan_tugas()" class="px-2 py-1 rounded-md bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md active:scale-90 duration-500 hidden">Selesai</button>
                 <button type="button"  class="px-2 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md active:scale-90 duration-500 opacity" onclick="toggleAddTaskModal()">Tambah Tugas</button>
+                <button type="button" onclick="toggleModalStatistik()" class="px-3 hover:bg-slate-600 duration-300 active:scale-90 rounded-md"><i class="mdi mdi-chart-box-outline text-white" style="font-size: 25px;"></i></button>
             </div>
         </div>
 
@@ -204,6 +214,34 @@
                 </div>
             </form>
 
+        </div>
+    </div>
+
+    <!-- Modal Statistik -->
+    <div class="w-full h-full absolute flex justify-center items-center left-0 top-0 bg-black bg-opacity-50 hidden" id="modalStatistik">
+        <div class="w-2/3 h-max max-h-[85%] bg-slate-700 rounded-md px-3 py-3 divide-y">
+            <div class="py-3">
+                <p class="text-white text-lg font-semibold">Statistik Tugas Anda</p>
+            </div>
+            <div class="grid grid-cols-3 gap-3 py-4">
+                <?php while ($row = mysqli_fetch_array($getStatistik)): ?>
+                    <div class="bg-slate-600 px-2 py-5 rounded-md text-white hover:scale-105 duration-500">
+                        <p class="font-bold text-lg">Total Tugas</p>
+                        <p class="pl-1 font-semibold"><?= $row['total_tugas'] ?></p>
+                    </div>
+                    <div class="bg-slate-600 px-2 py-5 rounded-md text-white hover:scale-105 duration-500">
+                        <p class="font-bold text-lg">Tugas Diselesaikan</p>
+                        <p class="pl-1 font-semibold"><?= $row['tugas_selesai'] ?></p>
+                    </div>
+                    <div class="bg-slate-600 px-2 py-5 rounded-md text-white hover:scale-105 duration-500">
+                        <p class="font-bold text-lg">Tugas Saat Ini</p>
+                        <p class="pl-1 font-semibold"><?= $row['tugas_saat_ini'] ?></p>
+                    </div>
+                <?php endwhile; ?>
+            </div>
+            <div class="py-3">
+                <button class="px-4 py-1 bg-red-500 float-end hover:bg-red-600 rounded my-2 text-white font-semibold active:scale-90 duration-300" onclick="toggleModalStatistik()">Tutup</button>
+            </div>
         </div>
     </div>
 
