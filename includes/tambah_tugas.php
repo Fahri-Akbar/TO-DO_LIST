@@ -11,6 +11,12 @@
 
         if ($result) header('location: ../index.php');
         else echo "<script> alert('Terjadi kesalahan dalam proses menambah tugas, silahkan coba lagi') </script>";
+
+        $total_tugas = "SELECT total_tugas FROM statistik";
+        $get_total_tugas = mysqli_fetch_array(mysqli_query($connect, $total_tugas));
+        $total_baru = $get_total_tugas['total_tugas'] + 1;
+        $perbarui_total = "UPDATE statistik SET total_tugas = '$total_baru' ";
+        mysqli_query($connect, $perbarui_total);
     }
 
 ?>

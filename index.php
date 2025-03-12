@@ -3,6 +3,14 @@
 
     $querySelect = "SELECT * FROM tugas";
     $getTugas = mysqli_query($connect, $querySelect);
+
+    $queryCount = "SELECT COUNT(*) as total FROM Tugas";
+    $resultCount = mysqli_query($connect, $queryCount);
+    $dataCount = mysqli_fetch_assoc($resultCount);
+    $total_tugas = $dataCount['total'];
+
+    $updateTotal = "UPDATE statistik SET tugas_saat_ini = '$total_tugas'";
+    mysqli_query($connect, $updateTotal);
 ?>
 
 <script>
@@ -53,11 +61,45 @@
         fetch(`includes/update_pin.php?id=${id}&status=${newStatus}`, {
             method: 'GET'
         })
-        .then (response => response.text())
         .then (result => {
             location.reload()
         })
         .catch (error => console.log('Terjadi Kesalahan Dalam Proses Pin Tugas: ', error))
+    }
+
+    let finishTask = []
+    const addFinishTask = (checkbox) => {
+        const val = parseInt(checkbox.value)
+
+        if (checkbox.checked) {
+            if (!finishTask.includes(val)) {
+                finishTask.push(val)
+            }
+        } else {
+            finishTask = finishTask.filter(prev => prev !== val)
+        }
+        console.log(finishTask);
+
+        const btnFinish = document.getElementById('btnFinish')
+        if (finishTask.length > 0) {
+            btnFinish.classList.remove('hidden')
+        } else {
+            btnFinish.classList.add('hidden')
+        }
+    }
+
+    const selesaikan_tugas = () => {
+        const confirm_finish = confirm ('Apakah Kamu Yakin Sudah Menyelesaikan Tugas Ini?')
+
+        if (confirm_finish) {
+            fetch(`includes/selesaikan_tugas.php?values=${finishTask}&jumlah=${finishTask.length}`, {
+                method: 'GET'
+            })
+            .then (result => {
+                location.reload()
+            })
+            .catch (error => console.log('Terjadi Kesalahan Dalam Proses Menyelesaikan Tugas: ', error))
+        }
     }
 
 </script>
@@ -78,15 +120,21 @@
         <!-- Head -->
         <div class="w-[70%] mt-[10%] flex justify-between">
             <h1 class="font-bold text-lg text-white">Tugas Anda</h1>
-            <button class="px-2 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md active:scale-90 duration-500" onclick="toggleAddTaskModal()">Tambah Tugas</button>
+            <div class="mb-0">
+                <button id="btnFinish" name="selesaikan_tugas" onclick="selesaikan_tugas()" class="px-2 py-1 rounded-md bg-green-600 hover:bg-green-700 text-white font-semibold shadow-md active:scale-90 duration-500 hidden">Selesai</button>
+                <button type="button"  class="px-2 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md active:scale-90 duration-500 opacity" onclick="toggleAddTaskModal()">Tambah Tugas</button>
+            </div>
         </div>
 
         <!-- Body -->
          <div class="w-[70%] max-h-[60%] overflow-y-auto flex flex-col">
-            <?php while ($row = mysqli_fetch_array($getTugas)): ?>
+            <?php 
+                if (mysqli_num_rows($getTugas) > 0) {
+                while ($row = mysqli_fetch_array($getTugas)): 
+            ?>
                 <form action="includes/hapus_tugas.php?id=<?= $row['ID'] ?>" method="post" class="w-full pl-3 bg-slate-700 text-white rounded-md hover:scale-100 duration-500 flex justify-between my-2 <?= $row['is_pin'] == 1 ? 'order-first' : '' ?>">
                     <div class="flex w-full items-center">
-                        <input type="checkbox" class="mr-3 accent-green-500">
+                        <input type="checkbox" value="<?= $row['ID'] ?>" onchange="addFinishTask(this)" class="mr-3 accent-green-500">
                         <div class="flex-1 cursor-pointer py-5" onclick="toggleViewModal('<?= $row['ID'] ?>', '<?= $row['Tugas'] ?>', '<?= $row['Deskripsi'] ?>')">
                             <input type="hidden" value="<?= $row['ID'] ?>" name="ID">
                             <p class="font-semibold"><?= $row['Tugas'] ?></p>
@@ -103,7 +151,10 @@
                         </button>
                     </div>
                 </form>
-            <?php endwhile; ?>
+            <?php 
+                endwhile;
+                } else echo "<p class ='text-white  text-lg text-center font-semibold'>Kamu Tidak Memiliki Tugas Untuk Saat Ini</p>"
+            ?>
          </div>
     </div>
 
