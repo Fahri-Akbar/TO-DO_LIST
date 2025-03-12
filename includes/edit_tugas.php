@@ -1,16 +1,19 @@
 <?php 
 
-    require '../Database/koneksi.php';
+require '../Database/koneksi.php';
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_data'])) {
-        $id = $_POST['taskId'];
-        $title = $_POST['taskTitle'];
-        $desc = $_POST['taskDesc'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_data'])) {
+    $taskId = $_POST['taskId']; 
+    $taskTitle = $_POST['taskTitle']; 
+    $taskDesc = $_POST['taskDesc']; 
 
-        $query = "UPDATE Tugas SET Tugas = '$title', Deskripsi = '$desc' WHERE ID = '$id' ";
-        $result = mysqli_query($connect, $query);
+    $editTaskQuery = $connect->prepare("UPDATE tugas SET Tugas = ?, Deskripsi = ? WHERE ID = ?");
+    $editTaskQuery->bind_param('ssi', $taskTitle, $taskDesc, $taskId);
+    $editTaskQuery->execute();
+    $editTaskQuery->close();
 
-        if ($result) header('location: ../index.php');
-        else echo "<script> alert('Terjadi kesalahan dalam proses mengedit tugas, silahkan coba lagi') </script>";
-    }
+    header('location: ../index.php');
+    exit();
+}
+
 ?>

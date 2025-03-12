@@ -3,20 +3,29 @@
     require '../Database/koneksi.php';
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tambah_tugas'])) {
-        $judul = $_POST['judul'];
-        $deskripsi = $_POST['deskripsi'];
+        $taskTitle = $_POST['judul'];
+        $taskDesc = $_POST['deskripsi'];
 
-        $query = "INSERT INTO Tugas (Tugas, Deskripsi) VALUES ('$judul', '$deskripsi') ";
-        $result = mysqli_query($connect, $query);
+        $insertTaskQuery = $connect->prepare("INSERT INTO Tugas (Tugas, Deskripsi) VALUES (?, ?)");
+        $insertTaskQuery->bind_param('ss', $taskTitle, $taskDesc);
+        $executeInsertTask = $insertTaskQuery->execute();
+        $insertTaskQuery->close();
 
-        if ($result) header('location: ../index.php');
-        else echo "<script> alert('Terjadi kesalahan dalam proses menambah tugas, silahkan coba lagi') </script>";
+        if ($executeInsertTask) {
+            $getTotalTaskQuery = $connect->prepare("SELECT total_tugas FROM statistik");
+            $getTotalTaskQuery->execute();
+            $getTotalTaskQuery->bind_result($totalTaskData);
+            $getTotalTaskQuery->fetch();
+            $getTotalTaskQuery->close();
 
-        $total_tugas = "SELECT total_tugas FROM statistik";
-        $get_total_tugas = mysqli_fetch_array(mysqli_query($connect, $total_tugas));
-        $total_baru = $get_total_tugas['total_tugas'] + 1;
-        $perbarui_total = "UPDATE statistik SET total_tugas = '$total_baru' ";
-        mysqli_query($connect, $perbarui_total);
+            $updateTotalTaskQuery = $connect->prepare("UPDATE statistik SET total_tugas = ?");
+            $newTotalTask = $totalTaskData + 1;
+            $updateTotalTaskQuery->bind_param('i', $newTotalTask);
+            $updateTotalTaskQuery->execute();
+            $updateTotalTaskQuery->close();
+        }
+
+        header('location: ../index.php');
+        exit();
     }
-
 ?>

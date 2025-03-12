@@ -1,15 +1,17 @@
 <?php
 
-    require '../Database/koneksi.php';
+require '../Database/koneksi.php';
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hapus_tugas'])) {
-        $id = $_GET['id'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['hapus_tugas'])) {
+    $taskId = $_GET['id'];
 
-        $query = "DELETE FROM Tugas WHERE ID = $id";
-        $result = mysqli_query($connect, $query);
+    $deleteTaskQuery = $connect->prepare("DELETE FROM tugas WHERE ID = ?");
+    $deleteTaskQuery->bind_param('i', $taskId);
+    $deleteTaskQuery->execute();
+    $deleteTaskQuery->close();
 
-        if ($result) header('location: ../index.php');
-        else echo "<script> alert('Terjadi kesalahan dalam proses menghapus tugas, silahkan coba lagi') </script>";
-    }
+    header('location: ../index.php');
+    exit();
+}
 
 ?>

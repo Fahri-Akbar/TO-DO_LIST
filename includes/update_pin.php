@@ -1,13 +1,18 @@
 <?php
 
-    require '../Database/koneksi.php';
+require '../Database/koneksi.php';
 
-    if (isset($_GET['id']) && isset($_GET['status'])) {
-        $id = $_GET['id'];
-        $status = $_GET['status'];
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['id']) && isset($_GET['status'])) {
+    $pinId = $_GET['id'];
+    $isPinned = $_GET['status'];
 
-        $query = "UPDATE Tugas SET is_pin = '$status' WHERE ID = '$id' ";
-        mysqli_query($connect, $query);
-    }
+    $updatePinStatusQuery = $connect->prepare("UPDATE tugas SET is_pin = ? WHERE ID = ?");
+    $updatePinStatusQuery->bind_param('ii', $isPinned, $pinId);
+    $updatePinStatusQuery->execute();
+    $updatePinStatusQuery->close();
+
+    header('location: ../index.php');
+    exit();
+}
 
 ?>

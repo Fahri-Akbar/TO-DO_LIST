@@ -1,24 +1,60 @@
 <?php
 
-    require '../Database/koneksi.php';
+require '../Database/koneksi.php';
 
-    if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['jumlah']) && isset($_GET['values'])) {
-        $id = $_GET['values'];
-        $jumlah = $_GET['jumlah'];
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['jumlah']) && isset($_GET['values'])) {
+    $idTaskList = $_GET['values'];
+    $taskTotal = $_GET['jumlah'];
 
-        $hapus_tugas = "DELETE FROM Tugas WHERE ID IN ($id)";
-        $result_hapus = mysqli_query($connect, $hapus_tugas);
+    $idTaskArray = explode(',', $idTaskList);
+    $idTaskArray = array_filter($idTaskArray, function($value) {
+        return is_numeric($value);
+    });
 
-        $hitung_tugas_selesai = "SELECT tugas_selesai FROM statistik";
-        $result_hitung = mysqli_query($connect, $hitung_tugas_selesai);
-        $get_hitung = mysqli_fetch_assoc($result_hitung);
-        $hasil_hitung = $get_hitung['tugas_selesai'] + $jumlah;
-        $update_tugas_selesai = "UPDATE statistik SET tugas_selesai = '$hasil_hitung'";
-        $result_update = mysqli_query($connect, $update_tugas_selesai);
+    if (!empty($idTaskArray)) {
+        $idTaskFinal = implode(',', $idTaskArray);
 
-        if ($result_hapus && $result_hitung && $result_update) {
-            header('location: ../index.php');
+        $deleteTasksQuery = "DELETE FROM Tugas WHERE ID IN ($idTaskFinal)";
+        $resultDeleteTasks = mysqli_query($connect, $deleteTasksQuery);
+
+        // UPDATE TOTAL FINISHED TASKS
+        if ($resultDeleteTasks) {
+            $getFinishedTaskQuery = $connect->prepare("SELECT tugas_selesai FROM statistik");
+            $getFinishedTaskQuery->execute();
+            $getFinishedTaskQuery->bind_result($totalFinishedTask);
+            $getFinishedTaskQuery->fetch();
+            $getFinishedTaskQuery->close();
+
+            $updateFinishedTask = $connect->prepare("UPDATE statistik SET tugas_selesai = ?");
+            $totalFinishedTaskNow = $totalFinishedTask + $taskTotal;
+            $updateFinishedTask->bind_param('i', $totalFinishedTaskNow);
+            $updateFinishedTask->execute();
+            $updateFinishedTask->close();
+        } else {
+            echo mysqli_error($connect);
         }
-    };
+
+        header('location: ../index.php');
+        exit();
+    }
+
+    // DELETE TASK
+
+    // // DELETE FINISH TASK
+    // $deleteTasksQuery = "DELETE FROM Tugas WHERE ID IN ($taskList)";
+    // $deleteTasksResult = mysqli_query($connect, $deleteTasksQuery);
+
+    // // UPDATE TOTAL FINISHED TASK
+    // $getFinishedTaskQuery = "SELECT tugas_selesai FROM statistik";
+    // $getFinishedTaskResult = mysqli_query($connect, $getFinishedTaskQuery);
+    // $finishedTaskData = mysqli_fetch_assoc($getFinishedTaskResult);
+    // $newFinishedTask = $finishedTaskData['tugas_selesai'] + $taskTotal;
+    // $updateFinishedTaskQuery = "UPDATE statistik SET tugas_selesai = '$newFinishedTask'";
+    // $updateFinishedTaskResult = mysqli_query($connect, $updateFinishedTaskQuery);
+
+    // if ($deleteTasksResult && $getFinishedTaskResult && $updateFinishedTaskResult) {
+    //     header('location: ../index.php');
+    // }
+};
 
 ?>
