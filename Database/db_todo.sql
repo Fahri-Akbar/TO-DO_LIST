@@ -38,7 +38,7 @@ CREATE TABLE `statistik` (
 --
 
 INSERT INTO `statistik` (`total_tugas`, `tugas_selesai`, `tugas_saat_ini`) VALUES
-(0, 0, 0);
+(3, 0, 3);
 
 -- --------------------------------------------------------
 
