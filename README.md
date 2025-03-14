@@ -10,13 +10,13 @@ Ini adalah **website To-Do List sederhana** yang dibuat untuk membantu pengguna 
 ## ✨ Fitur-Fitur Website
 
 - **Menambah Tugas**  
-  Pengguna dapat menambahkan tugas baru dengan mudah, cukup mengisi nama tugas dan deskripsi (opsional).
+  Pengguna dapat menambahkan tugas baru dengan mudah, cukup mengisi nama tugas dan deskripsi.
 
 - **Menghapus Tugas**  
   Tugas yang sudah tidak diperlukan dapat dihapus secara permanen dari daftar.
 
 - **Mengedit Tugas**  
-  Tugas yang sudah ditambahkan dapat diedit untuk memperbarui isi atau statusnya.
+  Tugas yang sudah ditambahkan dapat diedit untuk memperbarui tugas dan deskripsinya.
 
 - **Pin Tugas**  
   Fitur untuk **menandai (pin)** tugas penting agar muncul di bagian atas daftar tugas.
